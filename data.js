@@ -230,6 +230,7 @@ Data = (() => {
                     "        <th>Cost</th>" +
                     "        <th>Value</th>" +
                     "        <th>Profit</th>" +
+                    "<th>Supply/Demand</th>" +
                     "    </tr>")
                 $(".data").empty()
                 for(let i = y.length-1; i >= 0; i--) {
@@ -240,13 +241,13 @@ Data = (() => {
                     let profit = value - cost;
                     if (cost <= value) {
                         if (profit >= 1000 && profit <= 5000) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: orange">${Math.round(value - cost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: orange">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
                         } else if (profit >= 5001 && profit <= 10000) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: green">${Math.round(value - cost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: green">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
                         } else if (profit <= 999) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: red">${Math.round(value - cost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: red">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
                         } else if (profit >= 10001) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: blue">${Math.round(value - cost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: blue">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
                         }
                     }
                 }
@@ -270,6 +271,12 @@ Data = (() => {
                     return data["products"][item]["sell_summary"][0]["pricePerUnit"]
                 }
 
+                function getSupplyDemand(item) {
+                    let supply = data["products"][item]["quick_status"]["sellVolume"]
+                    let demand = data["products"][item]["quick_status"]["buyVolume"]
+                    return supply/demand*100;
+                }
+
                 function getValue(item) {
                     if (item === null || item === undefined) {
                         return 0;
@@ -291,13 +298,13 @@ Data = (() => {
                     let profit = totalValue - totalCraftCost
                     if (totalCraftCost < totalValue) {
                         if (profit >= 1000 && profit <= 5000) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: orange">${Math.round(totalValue -totalCraftCost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: orange">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
                         } else if (profit >= 5001 && profit <= 10000) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: green">${Math.round(totalValue -totalCraftCost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: green">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
                         } else if (profit <= 999) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: red">${Math.round(totalValue -totalCraftCost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: red">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
                         } else if (profit >= 10001) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: blue">${Math.round(totalValue -totalCraftCost)}</td><tr></tr>`)
+                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: blue">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
                         }
                     }
                 })
