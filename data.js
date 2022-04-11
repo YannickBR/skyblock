@@ -236,7 +236,8 @@ Data = (() => {
                 for(let i = y.length-1; i >= 0; i--) {
                     let nonEnchanted = y[i].key
                     let enchanted = y[i].value
-                    let cost = (getPrice(nonEnchanted) + 0.1) * amount;
+                    let cost = (getPrice(nonEnchanted) + 0.1) * amount; //this equals sell instant
+                    let buyInstant = getBIN(nonEnchanted) //this is buy instant
                     let value = getValue(enchanted) - (getValue() * 0.011)
                     let profit = value - cost;
                     if (cost <= value) {
@@ -253,13 +254,20 @@ Data = (() => {
                 }
                 Object.entries(data["products"]).forEach(([key, value]) => {
                     if (data["products"][key]["buy_summary"][0] !== undefined) {
-                        let buy = data["products"][key]["buy_summary"][0]["pricePerUnit"] * 1.011
-                        let sell = data["products"][key]["sell_summary"][0]["pricePerUnit"]
+                        let buy = getPrice(key)
+                        let sell = getValue(key) * 1.0011
+                        let sd = getSupplyDemand(key)
+                        let profit = sell - buy;
                         if (sell >= buy) {
-
-                            $(".data").append(`<p>
-                ${key}: (BUY: ${buy}, SELL: ${sell})
-                </p>`)
+                            if (profit >= 1000 && profit <= 5000) {
+                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: orange">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
+                            } else if (profit >= 5001 && profit <= 10000) {
+                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: green">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
+                            } else if (profit <= 999) {
+                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: red">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
+                            } else if (profit >= 10001) {
+                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: blue">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
+                            }
                         }
                     }
                 })
@@ -275,6 +283,10 @@ Data = (() => {
                     let supply = data["products"][item]["quick_status"]["sellVolume"]
                     let demand = data["products"][item]["quick_status"]["buyVolume"]
                     return supply/demand*100;
+                }
+
+                function getBIN(item) {
+                    return data["products"][item]["quick_status"]["buyPrice"]
                 }
 
                 function getValue(item) {
