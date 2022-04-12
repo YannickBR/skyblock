@@ -317,7 +317,7 @@ Data = (() => {
                             item: "",
                             craft_into: value["name"],
                             crafting_cost: totalCraftCost,
-                            crafting_value: totalCraftCost,
+                            crafting_value: totalValue,
                             crafting_profit: profit,
                             sd: getSupplyDemand(value["name"])
                         })
