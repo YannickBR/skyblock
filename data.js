@@ -1,8 +1,13 @@
 Data = (() => {
-
+    let previousDataCraft = []
+    let currentDataCraft = [];
+    let workingDataCraft = [];
     function test() {
         setInterval(function () {
             let data = $.getJSON("https://api.hypixel.net/skyblock/bazaar").done((data) => {
+
+                workingDataCraft = [];
+                ///crafting
                 let y = [
                     {
                         "key": "BROWN_MUSHROOM",
@@ -208,6 +213,14 @@ Data = (() => {
                         "key": "OBSIDIAN",
                         "value": "ENCHANTED_OBSIDIAN"
                     },
+                    {
+                        "key": "ENCHANTED_COAL",
+                        "value": "ENCHANTED_COAL_BLOCK"
+                    },
+                    {
+                        "key": "ENCHANTED_IRON",
+                        "value": "ENCHANTED_IRON_BLOCK"
+                    },
 /*                    {
                         "key": "HARD_STONE",
                         "value": "ENCHANTED_HARD_STONE"
@@ -222,17 +235,6 @@ Data = (() => {
                     }
                 ]
                 let amount = 160
-
-                $(".sortable").empty()
-                $(".sortable").append("    <tr>" +
-                    "        <th>Item</th>" +
-                    "        <th>Craft into</th>" +
-                    "        <th>Cost</th>" +
-                    "        <th>Value</th>" +
-                    "        <th>Profit</th>" +
-                    "<th>Supply/Demand</th>" +
-                    "    </tr>")
-                $(".data").empty()
                 for(let i = y.length-1; i >= 0; i--) {
                     let nonEnchanted = y[i].key
                     let enchanted = y[i].value
@@ -241,33 +243,31 @@ Data = (() => {
                     let value = getValue(enchanted) - (getValue() * 0.011)
                     let profit = value - cost;
                     if (cost <= value) {
-                        if (profit >= 1000 && profit <= 5000) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: orange">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
-                        } else if (profit >= 5001 && profit <= 10000) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: green">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
-                        } else if (profit <= 999) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: red">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
-                        } else if (profit >= 10001) {
-                            $(".sortable").append(`<tr><td>${nonEnchanted}</td><td>${enchanted}</td><td>${Math.round(cost)}</td><td>${Math.round(value)}</td><td style="color: blue">${Math.round(value - cost)}</td><td>${Math.round(getSupplyDemand(enchanted))}%</td><tr></tr>`)
-                        }
+                        workingDataCraft.push({
+                            item: nonEnchanted,
+                            craft_into: enchanted,
+                            crafting_cost: cost,
+                            crafting_value: value,
+                            crafting_profit: profit,
+                            sd: getSupplyDemand(enchanted)
+                        })
                     }
                 }
                 Object.entries(data["products"]).forEach(([key, value]) => {
                     if (data["products"][key]["buy_summary"][0] !== undefined) {
                         let buy = getPrice(key)
                         let sell = getValue(key) * 1.0011
-                        let sd = getSupplyDemand(key)
+                        let sed = getSupplyDemand(key)
                         let profit = sell - buy;
                         if (sell >= buy) {
-                            if (profit >= 1000 && profit <= 5000) {
-                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: orange">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
-                            } else if (profit >= 5001 && profit <= 10000) {
-                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: green">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
-                            } else if (profit <= 999) {
-                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: red">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
-                            } else if (profit >= 10001) {
-                                $(".sortable2").append(`<tr></tr><td>${key}</td><td>${Math.round(buy)}</td><td>${Math.round(sell)}</td><td style="color: blue">${Math.round(profit)}</td><td>${Math.round(sd)}%</td><tr></tr>`)
-                            }
+/*                            workingDataCraft.push({
+                                item: "",
+                                craft_into: key,
+                                crafting_cost: buy,
+                                crafting_value: sell,
+                                crafting_profit: profit,
+                                sd: sed
+                            })*/
                         }
                     }
                 })
@@ -276,7 +276,11 @@ Data = (() => {
                     if (item === null || item === undefined) {
                         return 0;
                     }
-                    return data["products"][item]["sell_summary"][0]["pricePerUnit"]
+                    try {
+                        return data["products"][item]["sell_summary"][0]["pricePerUnit"]
+                    } catch (e) {
+                        console.log(item)
+                    }
                 }
 
                 function getSupplyDemand(item) {
@@ -309,20 +313,110 @@ Data = (() => {
                     let totalValue = getValue(value["name"])
                     let profit = totalValue - totalCraftCost
                     if (totalCraftCost < totalValue) {
-                        if (profit >= 1000 && profit <= 5000) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: orange">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
-                        } else if (profit >= 5001 && profit <= 10000) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: green">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
-                        } else if (profit <= 999) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: red">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
-                        } else if (profit >= 10001) {
-                            $(".sortable").append(`<tr></tr><td> </td><td>${value["name"]}</td><td>${Math.round(totalCraftCost)}</td><td>${Math.round(totalValue)}</td><td style="color: blue">${Math.round(totalValue -totalCraftCost)}</td><td>${Math.round(getSupplyDemand(value["name"]))}%</td><tr></tr>`)
-                        }
+                        workingDataCraft.push({
+                            item: "",
+                            craft_into: value["name"],
+                            crafting_cost: totalCraftCost,
+                            crafting_value: totalCraftCost,
+                            crafting_profit: profit,
+                            sd: getSupplyDemand(value["name"])
+                        })
                     }
                 })
             })
+            update()
+            console.log(workingDataCraft)
+        }, 10000);
 
-        }, 5000);
+        function update() {
+            previousDataCraft = currentDataCraft;
+            currentDataCraft = workingDataCraft;
+            resetTable()
+
+            Object.entries(currentDataCraft).forEach(([key, value]) => {
+                let status = getIfChange(value["craft_into"])
+                addRow(value, status)
+            })
+        }
+
+        function addRow(data, status) {
+            let color;
+            let profit = data["crafting_profit"]
+            if (profit >= 1000 && profit <= 5000) {
+                color = "orange"
+            } else if (profit >= 5001 && profit <= 10000) {
+                color  = "green"
+            } else if (profit <= 999) {
+                color = "red"
+            } else if (profit >= 10001) {
+                color = "blue"
+            }
+            let delta = ""
+            if (status["status"] === "higher" || status["status"] === "lower") {
+                delta = ` ${status["delta"]}%`
+            }
+            $(".sortable").append(`<tr class="${status["status"]}"><td>${data["item"]}</td><td>${data["craft_into"]}</td><td>${Math.round(data["crafting_cost"])}</td><td>${Math.round(data["crafting_value"])}</td><td style="color: ${color}">${Math.round(data["crafting_profit"])} ${delta}</td><td>${Math.round(data["sd"])}%</td></tr>`)
+
+        }
+
+        function resetTable() {
+            let craftTable = $(".sortable")
+            craftTable.empty();
+            craftTable.append("    <tr>\n" +
+                "        <th>Item</th>\n" +
+                "        <th>Craft into</th>\n" +
+                "        <th>Cost</th>\n" +
+                "        <th>Value</th>\n" +
+                "        <th>Profit</th>\n" +
+                "        <th>Supply/Demand</th>\n" +
+                "    </tr>")
+
+        }
+
+        function getIfChange(current) {
+            let currentProfit;
+            let previousProfit;
+            Object.entries(currentDataCraft).forEach(([key, value]) => {
+                if (value["craft_into"] === current) {
+                    currentProfit = value["crafting_profit"]
+                }
+            })
+            Object.entries(previousDataCraft).forEach(([key, value]) => {
+                if (value["craft_into"] === current) {
+                    previousProfit = value["crafting_profit"]
+                }
+            })
+
+            console.log(`${currentProfit}, ${previousProfit}`)
+
+            if (currentProfit === undefined || previousProfit === undefined) {
+                return {
+                    "status": "removed",
+                    "delta": -1
+                }
+            }
+
+            if (currentProfit === previousProfit) {
+                return {
+                    "status": "removed",
+                    "delta": 0
+                }
+            }
+
+            if (currentProfit < previousProfit) {
+                return {
+                    "status": "lower",
+                    "delta": Math.round(((currentProfit-previousProfit)/previousProfit)*1000)/10
+                }
+            }
+
+            if  (currentProfit > previousProfit) {
+                return {
+                    "status": "higher",
+                    "delta": Math.round(((currentProfit-previousProfit)/previousProfit)*1000)/10
+                }
+            }
+        }
     }
 
 
