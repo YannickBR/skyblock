@@ -5,8 +5,22 @@ Data = (() => {
     function test() {
         setInterval(function () {
             let data = $.getJSON("https://api.hypixel.net/skyblock/bazaar").done((data) => {
-
                 workingDataCraft = [];
+                Object.entries(Recipes.list).forEach(([key, value]) => {
+                    let totalCraftCost = getTotalCost(value["recipe"])
+                    let totalValue = getValue(value["name"])
+                    let profit = totalValue - totalCraftCost
+                    if (totalCraftCost < totalValue) {
+                        workingDataCraft.push({
+                            item: "",
+                            craft_into: value["name"],
+                            crafting_cost: totalCraftCost,
+                            crafting_value: totalValue,
+                            crafting_profit: profit,
+                            sd: getSupplyDemand(value["name"])
+                        })
+                    }
+                })
                 ///crafting
                 let y = [
                     {
@@ -308,21 +322,6 @@ Data = (() => {
                     return cost;
                 }
 
-                Object.entries(Recipes.list).forEach(([key, value]) => {
-                    let totalCraftCost = getTotalCost(value["recipe"])
-                    let totalValue = getValue(value["name"])
-                    let profit = totalValue - totalCraftCost
-                    if (totalCraftCost < totalValue) {
-                        workingDataCraft.push({
-                            item: "",
-                            craft_into: value["name"],
-                            crafting_cost: totalCraftCost,
-                            crafting_value: totalValue,
-                            crafting_profit: profit,
-                            sd: getSupplyDemand(value["name"])
-                        })
-                    }
-                })
             })
             update()
             console.log(workingDataCraft)
@@ -354,8 +353,9 @@ Data = (() => {
             let delta = ""
             if (status["status"] === "higher" || status["status"] === "lower") {
                 delta = ` ${status["delta"]}%`
+                color = ""
             }
-            $(".sortable").append(`<tr class="${status["status"]}"><td>${data["item"]}</td><td>${data["craft_into"]}</td><td>${Math.round(data["crafting_cost"])}</td><td>${Math.round(data["crafting_value"])}</td><td style="color: ${color}">${Math.round(data["crafting_profit"])} ${delta}</td><td>${Math.round(data["sd"])}%</td></tr>`)
+            $(".sortable").append(`<tr class="${status["status"]}"><td>${data["item"]}</td><td>${data["craft_into"]}</td><td>${Math.round(data["crafting_cost"])}</td><td>${Math.round(data["crafting_value"])}</td><td class="${color}">${Math.round(data["crafting_profit"])} ${delta}</td><td>${Math.round(data["sd"])}%</td></tr>`)
 
         }
 
